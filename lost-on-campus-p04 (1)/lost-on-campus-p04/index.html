@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lost on a 600-Acre Campus</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root { --bg:#f5f6f8; --surface:#ffffff; --ink:#111827; --ink2:#374151; --muted:#6b7280; --line:#e5e7eb;
+          --brand:#1e3a8a; --brand-ink:#ffffff; --ok:#166534; --okbg:#dcfce7; --bad:#991b1b; --badbg:#fee2e2;
+          --warn:#92400e; --warnbg:#fef3c7; --info:#1e40af; --infobg:#dbeafe; --radius:10px; }
+  :root { box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+  *, *::before, *::after { box-sizing:inherit; }
+  body { margin:0; min-height:100vh; background:var(--bg); color:var(--ink);
+         font-family: "Inter", "Segoe UI", "Noto Sans Devanagari", system-ui, -apple-system, Roboto, Arial, sans-serif; font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+  [hidden] { display:none !important; }
+
+  .topbar { background:var(--surface); border-bottom:1px solid var(--line); }
+  .topbar-in { max-width:960px; margin:0 auto; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .logo { width:36px; height:36px; border-radius:8px; background:var(--brand); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.95rem; }
+  .brand h1 { margin:0; font-size:1.05rem; font-weight:650; letter-spacing:-.01em; }
+  .brand p { margin:0; font-size:.8rem; color:var(--muted); }
+  .right { display:flex; align-items:center; gap:10px; }
+  .tag { font-size:.75rem; color:var(--brand); background:var(--infobg); padding:4px 10px; border-radius:999px; font-weight:600; }
+  .langsel { width:auto; padding:6px 8px; font-size:.85rem; }
+
+  .wrap { max-width:960px; margin:0 auto; padding:20px 20px 40px; }
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .stat { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; }
+  .stat span { display:block; font-size:.78rem; color:var(--muted); font-weight:500; }
+  .stat b { display:block; font-size:1.5rem; font-weight:650; margin-top:2px; }
+  .progress { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; margin-top:12px; }
+  .progress-top { display:flex; justify-content:space-between; font-size:.85rem; color:var(--ink2); }
+  .progress-top b { color:var(--ink); }
+  .bar { height:6px; background:#e5e7eb; border-radius:999px; overflow:hidden; margin-top:10px; }
+  .bar i { display:block; height:100%; width:0; background:var(--brand); border-radius:999px; transition:width .5s ease; }
+
+  .tabs { display:flex; gap:24px; border-bottom:1px solid var(--line); margin-top:20px; overflow-x:auto; }
+  .tabs button { background:none; border:0; padding:10px 0; color:var(--muted); font:inherit; font-size:.95rem; font-weight:500; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; white-space:nowrap; }
+  .tabs button:hover { color:var(--ink); }
+  .tabs button.on { color:var(--brand); border-bottom-color:var(--brand); font-weight:600; }
+
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; align-items:start; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:20px; }
+  .card.full { grid-column:1 / -1; }
+  .card h2 { margin:0 0 4px; font-size:1rem; font-weight:650; }
+  .card h3 { margin:22px 0 4px; font-size:.92rem; font-weight:650; color:var(--ink2); }
+  .note { color:var(--muted); font-size:.85rem; margin:2px 0 0; line-height:1.5; }
+  label { display:block; font-size:.82rem; font-weight:500; color:var(--ink2); margin:14px 0 6px; }
+  input, select, textarea { width:100%; padding:9px 11px; border:1px solid #d1d5db; border-radius:8px; font:inherit; font-size:.95rem; background:var(--surface); color:var(--ink); }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--brand); box-shadow:0 0 0 3px rgba(30,58,138,.12); }
+  .btn { margin-top:16px; width:100%; padding:10px 14px; border:1px solid var(--brand); border-radius:8px; background:var(--brand); color:var(--brand-ink); font:inherit; font-size:.92rem; font-weight:600; cursor:pointer; }
+  .btn:hover { background:#1e40af; }
+  .btn.ghost { background:var(--surface); color:var(--brand); border-color:#d1d5db; }
+  .btn.ghost:hover { background:#f9fafb; }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .msg { margin-top:14px; font-size:.9rem; padding:0; }
+  .msg:not(:empty) { padding:10px 12px; border-radius:8px; }
+  .msg.ok { background:var(--okbg); color:var(--ok); }
+  .msg.bad { background:var(--badbg); color:var(--bad); }
+
+  .sticker { margin-top:18px; border:1px solid var(--line); border-radius:var(--radius); padding:18px; text-align:center; background:#fafafa; }
+  .sticker .t { font-size:.7rem; letter-spacing:.14em; font-weight:700; color:var(--muted); }
+  .sticker .perf { border-top:1px dashed #cbd5e1; margin:12px 0; }
+  .stk-emoji { font-size:2rem; line-height:1.2; margin:6px 0 0; }
+  #qr { margin:0 auto 10px; width:150px; height:150px; background:#fff; padding:6px; border:1px solid var(--line); border-radius:8px; }
+  #qr img, #qr canvas { display:block; margin:auto; }
+  .code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:.82rem; word-break:break-all; color:var(--ink2); }
+  .drop-txt { font-size:.88rem; font-weight:600; margin-top:6px; }
+
+  .map { position:relative; height:250px; margin-top:12px; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+         background:#eef2ee linear-gradient(#e3e9e3 1px, transparent 1px) 0 0 / 24px 24px, linear-gradient(90deg,#e3e9e3 1px, transparent 1px) 0 0 / 24px 24px; }
+  .road { position:absolute; background:#ffffff; border:1px solid #d6dcd6; }
+  .road.h { left:0; right:0; height:16px; top:52%; } .road.v { top:0; bottom:0; width:16px; left:44%; }
+  .pin { position:absolute; transform:translate(-50%,-100%); text-align:center; }
+  .pin .dot { width:30px; height:30px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.2); }
+  .pin .dot span { transform:rotate(45deg); font-weight:700; color:#fff; font-size:.8rem; }
+  .pin .lbl { margin-top:4px; font-size:.7rem; color:var(--ink2); background:#fff; border:1px solid var(--line); padding:1px 6px; border-radius:4px; white-space:nowrap; }
+  .pin.bounce .dot { animation:drop .5s ease; }
+  @keyframes drop { 0% { transform:rotate(-45deg) translateY(-18px); opacity:0; } 100% { transform:rotate(-45deg); opacity:1; } }
+
+  .list { list-style:none; padding:0; margin:8px 0 0; font-size:.88rem; }
+  .list li { display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .list li:last-child { border-bottom:0; }
+  .list time { color:var(--muted); white-space:nowrap; font-size:.78rem; }
+  .list .empty { color:var(--muted); justify-content:center; }
+
+  .search { margin:14px 0 12px; }
+  table { width:100%; border-collapse:collapse; font-size:.88rem; }
+  th, td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:600; font-size:.76rem; text-transform:uppercase; letter-spacing:.04em; }
+  .pill { display:inline-block; padding:2px 9px; border-radius:999px; font-size:.75rem; font-weight:600; }
+  .p-Registered { background:var(--infobg); color:var(--info); }
+  .p-Found { background:var(--warnbg); color:var(--warn); }
+  .p-Claimed { background:var(--okbg); color:var(--ok); }
+  .csv { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:.78rem; margin-top:10px; background:#fafafa; resize:vertical; }
+
+  #toast { position:fixed; left:50%; bottom:20px; transform:translateX(-50%) translateY(8px); background:var(--ink); color:#fff; padding:9px 16px; border-radius:8px; font-size:.88rem; opacity:0; transition:all .2s ease; pointer-events:none; }
+  #toast.show { opacity:1; transform:translateX(-50%); }
+  .foot { text-align:center; color:var(--muted); font-size:.78rem; margin:32px 0 0; }
+
+  @media (max-width:720px) {
+    .grid { grid-template-columns:1fr; }
+    .stats { grid-template-columns:repeat(2,1fr); }
+    .tag { display:none; }
+  }
+  @media print {
+    body { background:#fff; }
+    body * { visibility:hidden; }
+    #printArea, #printArea * { visibility:visible; }
+    #printArea { position:absolute; left:0; top:0; width:100%; border:1px solid #000; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="logo">LF</div>
+      <div>
+        <h1 data-i18n="brand">Lost on a 600-Acre Campus</h1>
+        <p data-i18n="brandSub">Campus Lost &amp; Found · Prototype</p>
+      </div>
+    </div>
+    <div class="right">
+      <span class="tag" data-i18n="tag">Prototype</span>
+      <select id="lang" class="langsel" aria-label="Language">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><span data-i18n="s_total">Total registered</span><b id="sTotal">0</b></div>
+    <div class="stat"><span data-i18n="s_open">Waiting for owner</span><b id="sOpen">0</b></div>
+    <div class="stat"><span data-i18n="s_found">Found at drop points</span><b id="sFound">0</b></div>
+    <div class="stat"><span data-i18n="s_claimed">Claimed</span><b id="sClaimed">0</b></div>
+  </div>
+  <div class="progress">
+    <div class="progress-top"><span data-i18n="recovery">Recovery rate</span><b id="rate">0%</b></div>
+    <div class="bar"><i id="barFill"></i></div>
+  </div>
+
+  <nav class="tabs">
+    <button data-tab="desk" class="on" data-i18n="tab_desk">Desk</button>
+    <button data-tab="finder" data-i18n="tab_finder">Finder</button>
+    <button data-tab="claim" data-i18n="tab_claim">Claim</button>
+    <button data-tab="register" data-i18n="tab_register">Register</button>
+  </nav>
+
+  <section id="desk" class="grid">
+    <div class="card">
+      <h2 data-i18n="desk_title">Gate Tag Desk</h2>
+      <p class="note" data-i18n="desk_note">Owner details stay at the desk. The sticker holds only the gadget ID, type and Drop Point.</p>
+      <label for="oName" data-i18n="l_name">Owner name</label>
+      <input id="oName">
+      <label for="oPhone" data-i18n="l_phone">Phone number</label>
+      <input id="oPhone" inputmode="numeric" maxlength="10" data-i18n-ph="ph_phone" placeholder="10 digits">
+      <label for="gType" data-i18n="l_type">Gadget type</label>
+      <select id="gType">
+        <option value="Smartphone" data-i18n="ty_Smartphone">Smartphone</option>
+        <option value="Power bank" data-i18n="ty_Power_bank">Power bank</option>
+        <option value="Earbuds" data-i18n="ty_Earbuds">Earbuds</option>
+        <option value="Laptop" data-i18n="ty_Laptop">Laptop</option>
+        <option value="Other" data-i18n="ty_Other">Other</option>
+      </select>
+      <label for="dPref" data-i18n="l_pref">Preferred Drop Point</label>
+      <select id="dPref"><option value="" data-i18n="auto">Auto (assigned by desk)</option></select>
+      <label for="secret" data-i18n="l_secret">Secret detail (needed to claim)</label>
+      <input id="secret">
+      <button class="btn" id="makeTag" data-i18n="btn_create">Create sticker</button>
+      <div id="deskMsg" class="msg"></div>
+    </div>
+    <div class="card">
+      <h2 data-i18n="prev_title">Sticker preview</h2>
+      <p class="note" data-i18n="prev_note">Generated after registration. Print it and attach it to the gadget.</p>
+      <div id="printArea" class="sticker" hidden>
+        <div class="t" data-i18n="stk_head">CAMPUS LOST &amp; FOUND</div>
+        <div id="stkEmoji" class="stk-emoji"></div>
+        <div class="perf"></div>
+        <div id="qr"></div>
+        <div id="stickerCode" class="code"></div>
+        <div id="stickerDrop" class="drop-txt"></div>
+      </div>
+      <div class="row2" id="stickerBtns" hidden>
+        <button class="btn ghost" id="printBtn" data-i18n="btn_print">Print sticker</button>
+        <button class="btn ghost" id="newBtn" data-i18n="btn_new">New entry</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="finder" class="grid" hidden>
+    <div class="card">
+      <h2 data-i18n="finder_title">Finder</h2>
+      <p class="note" data-i18n="finder_note">Scan the QR with a phone camera, or paste the code printed under it.</p>
+      <label for="scanIn" data-i18n="l_code">Sticker code</label>
+      <input id="scanIn" placeholder="G-1001|Smartphone|Blue A">
+      <button class="btn" id="scanBtn" data-i18n="btn_find">Find drop point</button>
+      <div id="finderMsg" class="msg"></div>
+      <div id="moveBox" hidden>
+        <label for="mDrop" data-i18n="l_move">Change Drop Point</label>
+        <select id="mDrop"></select>
+        <button class="btn ghost" id="moveBtn" data-i18n="btn_move">Confirm drop point</button>
+        <div id="moveMsg" class="msg"></div>
+      </div>
+      <div class="map" id="map"></div>
+      <p class="note" style="margin-top:8px;" data-i18n="map_note">Pins show the number of items waiting at each Drop Point.</p>
+    </div>
+    <div class="card">
+      <h2 data-i18n="rep_title">Found without a sticker</h2>
+      <p class="note" data-i18n="rep_note">Describe the item and choose the Drop Point where you left it.</p>
+      <label for="rType" data-i18n="l_rtype">Item type</label>
+      <select id="rType">
+        <option value="Smartphone" data-i18n="ty_Smartphone">Smartphone</option>
+        <option value="Power bank" data-i18n="ty_Power_bank">Power bank</option>
+        <option value="Earbuds" data-i18n="ty_Earbuds">Earbuds</option>
+        <option value="Laptop" data-i18n="ty_Laptop">Laptop</option>
+        <option value="Other" data-i18n="ty_Other">Other</option>
+      </select>
+      <label for="rDesc" data-i18n="l_rdesc">Description (colour, case, stickers)</label>
+      <input id="rDesc" data-i18n-ph="ph_rdesc" placeholder="e.g. black case, blue sticker">
+      <label for="rDrop" data-i18n="l_rdrop">Drop Point</label>
+      <select id="rDrop"></select>
+      <button class="btn ghost" id="reportBtn" data-i18n="btn_report">Submit report</button>
+      <div id="reportMsg" class="msg"></div>
+    </div>
+  </section>
+
+  <section id="claim" class="grid" hidden>
+    <div class="card">
+      <h2 data-i18n="claim_title">Owner claim</h2>
+      <p class="note" data-i18n="claim_note">Enter the Gadget ID from your sticker and the secret detail you gave at the desk.</p>
+      <label for="cId" data-i18n="l_id">Gadget ID</label>
+      <input id="cId" placeholder="G-1001">
+      <label for="cSecret" data-i18n="l_secret2">Secret detail</label>
+      <input id="cSecret">
+      <button class="btn" id="claimBtn" data-i18n="btn_verify">Verify ownership</button>
+      <div id="claimMsg" class="msg"></div>
+    </div>
+    <div class="card">
+      <h2 data-i18n="alert_title">Alerts</h2>
+      <p class="note" data-i18n="alert_note">Items found and waiting for collection.</p>
+      <ul class="list" id="alerts"></ul>
+    </div>
+  </section>
+
+  <section id="register" class="card full" hidden>
+    <h2 data-i18n="reg_title">Register</h2>
+    <p class="note" data-i18n="reg_note">Phone numbers are masked. Owner names are not shown here.</p>
+    <div class="search"><input id="search" data-i18n-ph="ph_search" placeholder="Search by ID, type or status"></div>
+    <table>
+      <thead><tr>
+        <th data-i18n="th_id">ID</th><th data-i18n="th_type">Type</th><th data-i18n="th_phone">Phone</th><th data-i18n="th_drop">Drop Point</th><th data-i18n="th_status">Status</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="row2" style="margin-top:14px;">
+      <button class="btn ghost" id="demoBtn" data-i18n="btn_demo">Load demo data</button>
+      <button class="btn ghost" id="clearBtn" data-i18n="btn_clear">Clear all</button>
+    </div>
+
+    <h3 data-i18n="log_title">Activity log</h3>
+    <ul class="list" id="log"></ul>
+
+    <h3 data-i18n="rep_list_title">Found without a sticker</h3>
+    <ul class="list" id="reports"></ul>
+
+    <h3 data-i18n="exp_title">Export</h3>
+    <p class="note" data-i18n="exp_note">Generates CSV of registered gadgets. Phone numbers stay masked and names are excluded.</p>
+    <textarea id="csvOut" readonly rows="5" class="csv"></textarea>
+    <button class="btn ghost" id="csvBtn" data-i18n="btn_csv">Generate CSV</button>
+    <div id="csvMsg" class="msg"></div>
+  </section>
+
+  <p class="foot" data-i18n="foot">Team P04 · Lovely Professional University</p>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function () {
+  const T = {
+    en: {
+      brand:"Lost on a 600-Acre Campus", brandSub:"Campus Lost & Found · Prototype", tag:"Prototype",
+      s_total:"Total registered", s_open:"Waiting for owner", s_found:"Found at drop points", s_claimed:"Claimed", recovery:"Recovery rate",
+      tab_desk:"Desk", tab_finder:"Finder", tab_claim:"Claim", tab_register:"Register",
+      desk_title:"Gate Tag Desk", desk_note:"Owner details stay at the desk. The sticker holds only the gadget ID, type and Drop Point.",
+      l_name:"Owner name", l_phone:"Phone number", ph_phone:"10 digits", l_type:"Gadget type", l_secret:"Secret detail (needed to claim)", btn_create:"Create sticker",
+      prev_title:"Sticker preview", prev_note:"Generated after registration. Print it and attach it to the gadget.", btn_print:"Print sticker", btn_new:"New entry", stk_head:"CAMPUS LOST & FOUND",
+      finder_title:"Finder", finder_note:"Scan the QR with a phone camera, or paste the code printed under it.", l_code:"Sticker code", btn_find:"Find drop point", map_note:"Pins show the number of items waiting at each Drop Point.",
+      rep_title:"Found without a sticker", rep_note:"Describe the item and choose the Drop Point where you left it.", l_rtype:"Item type", l_rdesc:"Description (colour, case, stickers)", ph_rdesc:"e.g. black case, blue sticker", l_rdrop:"Drop Point", btn_report:"Submit report",
+      claim_title:"Owner claim", claim_note:"Enter the Gadget ID from your sticker and the secret detail you gave at the desk.", l_id:"Gadget ID", l_secret2:"Secret detail", btn_verify:"Verify ownership",
+      alert_title:"Alerts", alert_note:"Items found and waiting for collection.", alert_none:"No items waiting for collection.",
+      reg_title:"Register", reg_note:"Phone numbers are masked. Owner names are not shown here.", ph_search:"Search by ID, type or status",
+      th_id:"ID", th_type:"Type", th_phone:"Phone", th_drop:"Drop Point", th_status:"Status", no_records:"No records yet.",
+      btn_demo:"Load demo data", btn_clear:"Clear all", log_title:"Activity log", log_none:"No activity yet.", rep_list_title:"Found without a sticker", rep_none:"No reports yet.",
+      exp_title:"Export", exp_note:"Generates CSV of registered gadgets. Phone numbers stay masked and names are excluded.", btn_csv:"Generate CSV",
+      foot:"Team P04 · Lovely Professional University",
+      m_missing:"Name, a 10-digit phone number and a secret detail are required.", m_registered:"{id} registered. Attach the sticker to the gadget.",
+      m_notfound:"This sticker is not in the system. Take the gadget to the nearest Drop Point.", m_thanks:"Thank you. {id} ({type}) is registered. Please drop it at {drop}.",
+      m_reqdesc:"Please add a short description.", m_reportsaved:"Report {id} saved. Thank you for helping.", m_verify_fail:"Verification failed. Check the Gadget ID and secret detail.",
+      m_claimed:"This gadget has already been claimed.", m_verified:"Verified. Collect {id} at {drop} with a photo ID.",
+      toast_verified:"Ownership verified", toast_demo:"Demo data loaded", toast_cleared:"All records cleared", confirm_clear:"Delete all records from this device?",
+      m_csv:"CSV generated. Select the text and copy it into Excel or a .csv file.", m_qr_off:"QR unavailable offline",
+      log_reg:"{id} registered ({type})", log_found:"{id} found and waiting at {drop}", log_claim:"{id} claimed by owner", log_demo:"Demo data loaded", log_rep:"{id} found item reported ({type})",
+      alert_text:"{type} ({id}) is at {drop}", found_label:"Found",
+      l_pref:"Preferred Drop Point", auto:"Auto (assigned by desk)", l_move:"Change Drop Point", btn_move:"Confirm drop point",
+      m_noscan:"Scan or enter a sticker code first.", m_samedrop:"The item is already at this Drop Point.", m_moved:"{id} will now be dropped at {drop}.", log_moved:"{id} drop point changed to {drop}",
+      ty_Smartphone:"Smartphone", ty_Power_bank:"Power bank", ty_Earbuds:"Earbuds", ty_Laptop:"Laptop", ty_Other:"Other",
+      st_Registered:"Registered", st_Found:"Found", st_Claimed:"Claimed",
+      c_Blue:"Blue", c_Red:"Red", c_Green:"Green", c_Yellow:"Yellow",
+      z_Main:"Main Gate", z_Hostel:"Hostel Block", z_Library:"Library", z_Food:"Food Court"
+    },
+    hi: {
+      brand:"600 एकड़ कैंपस में खोया", brandSub:"कैंपस गुमशुदा और मिला सामान · प्रोटोटाइप", tag:"प्रोटोटाइप",
+      s_total:"कुल दर्ज", s_open:"मालिक का इंतज़ार", s_found:"ड्रॉप पॉइंट पर मिले", s_claimed:"वापस लिए गए", recovery:"वापसी दर",
+      tab_desk:"डेस्क", tab_finder:"खोजने वाला", tab_claim:"दावा", tab_register:"रजिस्टर",
+      desk_title:"गेट टैग डेस्क", desk_note:"मालिक की जानकारी डेस्क पर रहती है। स्टिकर में सिर्फ गैजेट ID, प्रकार और ड्रॉप पॉइंट होता है।",
+      l_name:"मालिक का नाम", l_phone:"फ़ोन नंबर", ph_phone:"10 अंक", l_type:"गैजेट का प्रकार", l_secret:"गुप्त जानकारी (दावे के लिए ज़रूरी)", btn_create:"स्टिकर बनाएँ",
+      prev_title:"स्टिकर पूर्वावलोकन", prev_note:"दर्ज करने के बाद बनता है। इसे प्रिंट करके गैजेट पर लगाएँ।", btn_print:"स्टिकर प्रिंट करें", btn_new:"नई एंट्री", stk_head:"कैंपस गुमशुदा और मिला सामान",
+      finder_title:"खोजने वाला", finder_note:"फ़ोन कैमरे से QR स्कैन करें, या स्टिकर पर छपा कोड पेस्ट करें।", l_code:"स्टिकर कोड", btn_find:"ड्रॉप पॉइंट खोजें", map_note:"पिन दिखाते हैं कि हर ड्रॉप पॉइंट पर कितने सामान इंतज़ार में हैं।",
+      rep_title:"बिना स्टिकर वाला सामान मिला", rep_note:"सामान का विवरण लिखें और जहाँ छोड़ा हो वह ड्रॉप पॉइंट चुनें।", l_rtype:"सामान का प्रकार", l_rdesc:"विवरण (रंग, कवर, स्टिकर)", ph_rdesc:"जैसे काला कवर, नीला स्टिकर", l_rdrop:"ड्रॉप पॉइंट", btn_report:"रिपोर्ट भेजें",
+      claim_title:"मालिक का दावा", claim_note:"स्टिकर का गैजेट ID और डेस्क पर दी गई गुप्त जानकारी लिखें।", l_id:"गैजेट ID", l_secret2:"गुप्त जानकारी", btn_verify:"मालिकाना हक जाँचें",
+      alert_title:"सूचनाएँ", alert_note:"मिले हुए सामान जो लेने के लिए इंतज़ार कर रहे हैं।", alert_none:"कोई सामान इंतज़ार में नहीं है।",
+      reg_title:"रजिस्टर", reg_note:"फ़ोन नंबर छिपे रहते हैं। मालिक के नाम यहाँ नहीं दिखते।", ph_search:"ID, प्रकार या स्थिति से खोजें",
+      th_id:"ID", th_type:"प्रकार", th_phone:"फ़ोन", th_drop:"ड्रॉप पॉइंट", th_status:"स्थिति", no_records:"अभी कोई रिकॉर्ड नहीं है।",
+      btn_demo:"डेमो डेटा लोड करें", btn_clear:"सब हटाएँ", log_title:"गतिविधि लॉग", log_none:"अभी कोई गतिविधि नहीं है।", rep_list_title:"बिना स्टिकर वाला सामान मिला", rep_none:"अभी कोई रिपोर्ट नहीं है।",
+      exp_title:"निर्यात", exp_note:"दर्ज गैजेट्स की CSV बनाता है। फ़ोन नंबर छिपे रहते हैं और नाम शामिल नहीं होते।", btn_csv:"CSV बनाएँ",
+      foot:"टीम P04 · लवली प्रोफेशनल यूनिवर्सिटी",
+      m_missing:"नाम, 10 अंकों का फ़ोन नंबर और गुप्त जानकारी ज़रूरी है।", m_registered:"{id} दर्ज हो गया। स्टिकर गैजेट पर लगाएँ।",
+      m_notfound:"यह स्टिकर सिस्टम में नहीं है। गैजेट को नज़दीकी ड्रॉप पॉइंट पर ले जाएँ।", m_thanks:"धन्यवाद। {id} ({type}) दर्ज है। कृपया इसे {drop} पर रखें।",
+      m_reqdesc:"कृपया एक छोटा विवरण लिखें।", m_reportsaved:"रिपोर्ट {id} सेव हो गई। मदद के लिए धन्यवाद।", m_verify_fail:"सत्यापन विफल। गैजेट ID और गुप्त जानकारी जाँचें।",
+      m_claimed:"यह गैजेट पहले ही वापस लिया जा चुका है।", m_verified:"सत्यापित। {id} को {drop} से फ़ोटो ID के साथ लें।",
+      toast_verified:"मालिकाना हक सत्यापित", toast_demo:"डेमो डेटा लोड हुआ", toast_cleared:"सारे रिकॉर्ड हटाए गए", confirm_clear:"इस डिवाइस से सारे रिकॉर्ड हटाएँ?",
+      m_csv:"CSV बन गई। टेक्स्ट चुनकर Excel या .csv फ़ाइल में कॉपी करें।", m_qr_off:"ऑफ़लाइन QR उपलब्ध नहीं",
+      log_reg:"{id} दर्ज ({type})", log_found:"{id} मिला और {drop} पर इंतज़ार में है", log_claim:"{id} मालिक ने वापस लिया", log_demo:"डेमो डेटा लोड हुआ", log_rep:"{id} मिले सामान की रिपोर्ट ({type})",
+      alert_text:"{type} ({id}) {drop} पर है", found_label:"मिला",
+      l_pref:"पसंदीदा ड्रॉप पॉइंट", auto:"ऑटो (डेस्क तय करेगा)", l_move:"ड्रॉप पॉइंट बदलें", btn_move:"ड्रॉप पॉइंट पक्का करें",
+      m_noscan:"पहले स्टिकर कोड स्कैन या दर्ज करें।", m_samedrop:"सामान पहले से इसी ड्रॉप पॉइंट पर है।", m_moved:"{id} अब {drop} पर रखा जाएगा।", log_moved:"{id} का ड्रॉप पॉइंट बदला गया: {drop}",
+      ty_Smartphone:"स्मार्टफ़ोन", ty_Power_bank:"पावर बैंक", ty_Earbuds:"ईयरबड्स", ty_Laptop:"लैपटॉप", ty_Other:"अन्य",
+      st_Registered:"दर्ज", st_Found:"मिला", st_Claimed:"वापस लिया",
+      c_Blue:"नीला", c_Red:"लाल", c_Green:"हरा", c_Yellow:"पीला",
+      z_Main:"मेन गेट", z_Hostel:"हॉस्टल ब्लॉक", z_Library:"लाइब्रेरी", z_Food:"फ़ूड कोर्ट"
+    }
+  };
+
+  const DROPS = [
+    { c:"Blue",   l:"A", zone:"Main",    hex:"#1e40af", x:16, y:28 },
+    { c:"Red",    l:"B", zone:"Hostel",  hex:"#b91c1c", x:80, y:30 },
+    { c:"Green",  l:"C", zone:"Library", hex:"#15803d", x:50, y:70 },
+    { c:"Yellow", l:"D", zone:"Food",    hex:"#b45309", x:24, y:82 }
+  ];
+  const KEY = "p04-lost-campus-v3", LKEY = "p04-lang";
+  let items = [], seq = 1001, dropIdx = 0, logs = [], reports = [], lang = "en";
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  const tr = (k, p = {}) => ((T[lang] && T[lang][k]) || T.en[k] || k).replace(/\{(\w+)\}/g, (_, n) => p[n] ?? "");
+  const maskPhone = p => p.replace(/\d(?=\d{2})/g, "•");
+  const colour = d => tr("c_" + d.c);
+  const dropName = d => `${colour(d)} ${d.l} · ${tr("z_" + d.zone)}`;
+  const dropByCode = code => DROPS.find(d => `${d.c} ${d.l}` === code);
+  const dropLabel = code => { const d = dropByCode(code); return d ? dropName(d) : code; };
+  const typeLabel = t => tr("ty_" + t.replace(/ /g, "_"));
+  const now = () => new Date().toLocaleString(lang === "hi" ? "hi-IN" : "en-IN", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" });
+  const setMsg = (el, text, cls) => { el.className = "msg " + (cls || ""); el.textContent = text; };
+  let toastT;
+  function toast(text) {
+    const t = $("toast"); t.textContent = text; t.classList.add("show");
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2000);
+  }
+
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ items, seq, dropIdx, logs, reports })); } catch (e) {} }
+  function load() {
+    try { const d = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (d) { items = d.items; seq = d.seq; dropIdx = d.dropIdx; logs = d.logs || []; reports = d.reports || []; } } catch (e) {}
+    try { const l = localStorage.getItem(LKEY); if (l === "en" || l === "hi") lang = l; } catch (e) {}
+  }
+  function logEvent(k, p) { logs.unshift({ k, p, t: now() }); logs = logs.slice(0, 50); }
+
+  function applyStatic() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = tr(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = tr(el.dataset.i18nPh); });
+    $("lang").value = lang;
+    fillPref();
+    document.title = tr("brand");
+  }
+
+  function refresh() {
+    const n = s => items.filter(i => i.status === s).length;
+    const total = items.length, claimed = n("Claimed");
+    const pct = total ? Math.round(claimed / total * 100) : 0;
+    $("sTotal").textContent = total;
+    $("sOpen").textContent = n("Registered");
+    $("sFound").textContent = n("Found");
+    $("sClaimed").textContent = claimed;
+    $("rate").textContent = pct + "%";
+    $("barFill").style.width = pct + "%";
+    renderMap(); renderRows(); renderLog(); renderAlerts(); renderReports(); fillDrops();
+  }
+
+  function renderMap(bounceId) {
+    const map = $("map");
+    map.innerHTML = '<div class="road h"></div><div class="road v"></div>';
+    DROPS.forEach(d => {
+      const waiting = items.filter(i => i.drop.c === d.c && i.drop.l === d.l && i.status !== "Claimed").length;
+      const pin = document.createElement("div");
+      pin.className = "pin" + (bounceId === d.c ? " bounce" : "");
+      pin.style.left = d.x + "%"; pin.style.top = d.y + "%";
+      pin.innerHTML = `<div class="dot" style="background:${d.hex}"><span>${waiting}</span></div><div class="lbl">${esc(dropName(d))}</div>`;
+      map.appendChild(pin);
+    });
+  }
+
+  function renderRows() {
+    const q = $("search").value.trim().toLowerCase();
+    const list = items.filter(i => !q || [i.id, i.type, i.status].join(" ").toLowerCase().includes(q));
+    const tbody = $("rows"); tbody.innerHTML = "";
+    if (!list.length) { tbody.innerHTML = `<tr><td colspan="5">${esc(tr("no_records"))}</td></tr>`; return; }
+    list.forEach(i => tbody.insertAdjacentHTML("beforeend",
+      `<tr><td>${esc(i.id)}</td><td>${esc(typeLabel(i.type))}</td><td>${esc(maskPhone(i.phone))}</td><td>${esc(i.drop.c + " " + i.drop.l)}</td><td><span class="pill p-${esc(i.status)}">${esc(tr("st_" + i.status))}</span></td></tr>`));
+  }
+
+  function renderLog() {
+    const ul = $("log");
+    if (!logs.length) { ul.innerHTML = `<li class="empty">${esc(tr("log_none"))}</li>`; return; }
+    ul.innerHTML = logs.map(l => `<li><span>${esc(logText(l))}</span><time>${esc(l.t)}</time></li>`).join("");
+  }
+  function logText(l) {
+    const p = { ...l.p };
+    if (p.type) p.type = typeLabel(p.type);
+    if (p.drop) p.drop = dropLabel(p.drop);
+    return tr(l.k, p);
+  }
+  function renderAlerts() {
+    const ul = $("alerts");
+    const found = items.filter(i => i.status === "Found");
+    if (!found.length) { ul.innerHTML = `<li class="empty">${esc(tr("alert_none"))}</li>`; return; }
+    ul.innerHTML = found.map(i => `<li><span>${esc(tr("alert_text", { type: typeLabel(i.type), id: i.id, drop: dropLabel(i.drop.c + " " + i.drop.l) }))}</span><time>${esc(tr("found_label"))}</time></li>`).join("");
+  }
+  function renderReports() {
+    const ul = $("reports");
+    if (!reports.length) { ul.innerHTML = `<li class="empty">${esc(tr("rep_none"))}</li>`; return; }
+    ul.innerHTML = reports.map(r => `<li><span>${esc(r.id)} · ${esc(typeLabel(r.type))}: ${esc(r.desc)} (${esc(dropLabel(r.drop))})</span><time>${esc(r.t)}</time></li>`).join("");
+  }
+  function fillPref() {
+    const cur = $("dPref").value;
+    $("dPref").innerHTML = `<option value="">${esc(tr("auto"))}</option>` + DROPS.map(d => `<option value="${esc(d.c + " " + d.l)}">${esc(dropName(d))}</option>`).join("");
+    $("dPref").value = cur;
+  }
+  function fillMove(current) {
+    $("mDrop").innerHTML = DROPS.map(d => `<option value="${esc(d.c + " " + d.l)}">${esc(dropName(d))}</option>`).join("");
+    if (current) $("mDrop").value = current.c + " " + current.l;
+  }
+  function fillDrops() {
+    const cur = $("rDrop").value;
+    $("rDrop").innerHTML = DROPS.map(d => `<option value="${esc(d.c + " " + d.l)}">${esc(dropName(d))}</option>`).join("");
+    if (cur) $("rDrop").value = cur;
+  }
+
+  document.querySelectorAll(".tabs button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("on"));
+      btn.classList.add("on");
+      ["desk","finder","claim","register"].forEach(t => $(t).hidden = (t !== btn.dataset.tab));
+      refresh();
+    });
+  });
+
+  $("lang").addEventListener("change", e => {
+    lang = e.target.value;
+    try { localStorage.setItem(LKEY, lang); } catch (err) {}
+    applyStatic(); refresh();
+  });
+
+  // Sticker emoji: a different one each time, cycling through a shuffled list
+  const EMOJIS = ["🎒","📱","🔋","🎧","💻","🔑","🧭","⭐","🦉","🐯","🌿","🚀","🍀","🎯","🌟","🦊","🐼","🎈","🌈","🪴"];
+  let bag = [], lastEmoji = "";
+  function nextEmoji() {
+    if (!bag.length) bag = EMOJIS.filter(e => e !== lastEmoji).sort(() => Math.random() - 0.5);
+    lastEmoji = bag.pop();
+    return lastEmoji;
+  }
+
+  let lastScanId = null;
+  // Desk
+  $("makeTag").addEventListener("click", () => {
+    const name = $("oName").value.trim(), phone = $("oPhone").value.trim(), secret = $("secret").value.trim(), type = $("gType").value;
+    if (!name || !/^\d{10}$/.test(phone) || !secret) { setMsg($("deskMsg"), tr("m_missing"), "bad"); return; }
+    const pref = dropByCode($("dPref").value);
+    const item = { id: "G-" + seq++, name, phone, secret, type, drop: pref || DROPS[dropIdx++ % DROPS.length], status: "Registered" };
+    items.push(item); logEvent("log_reg", { id: item.id, type: item.type }); save();
+    const code = `${item.id}|${item.type}|${item.drop.c} ${item.drop.l}`;
+    const qrEl = $("qr"); qrEl.innerHTML = "";
+    if (typeof QRCode !== "undefined") new QRCode(qrEl, { text: code, width: 138, height: 138, correctLevel: QRCode.CorrectLevel.M });
+    else qrEl.textContent = tr("m_qr_off");
+    $("stickerCode").textContent = code;
+    $("stickerDrop").textContent = dropName(item.drop);
+    $("stkEmoji").textContent = nextEmoji();
+    $("printArea").hidden = false; $("stickerBtns").hidden = false; $("makeTag").hidden = true;
+    setMsg($("deskMsg"), tr("m_registered", { id: item.id }), "ok");
+    refresh();
+  });
+  $("printBtn").addEventListener("click", () => window.print());
+  $("newBtn").addEventListener("click", () => {
+    ["oName","oPhone","secret"].forEach(id => $(id).value = ""); $("dPref").value = "";
+    $("printArea").hidden = true; $("stickerBtns").hidden = true; $("makeTag").hidden = false;
+    setMsg($("deskMsg"), "");
+  });
+
+  // Finder
+  $("scanBtn").addEventListener("click", () => {
+    const id = $("scanIn").value.trim().split("|")[0];
+    const item = items.find(i => i.id === id);
+    if (!item) { setMsg($("finderMsg"), tr("m_notfound"), "bad"); return; }
+    if (item.status === "Registered") { item.status = "Found"; logEvent("log_found", { id: item.id, drop: item.drop.c + " " + item.drop.l }); save(); }
+    setMsg($("finderMsg"), tr("m_thanks", { id: item.id, type: typeLabel(item.type), drop: dropName(item.drop) }), "ok");
+    lastScanId = item.id; $("moveBox").hidden = false; $("moveMsg").className = "msg"; $("moveMsg").textContent = ""; fillMove(item.drop);
+    refresh(); renderMap(item.drop.c);
+  });
+  $("moveBtn").addEventListener("click", () => {
+    const item = items.find(i => i.id === lastScanId);
+    if (!item) { setMsg($("moveMsg"), tr("m_noscan"), "bad"); return; }
+    const code = $("mDrop").value, d = dropByCode(code);
+    if (item.drop.c + " " + item.drop.l === code) { setMsg($("moveMsg"), tr("m_samedrop"), "bad"); return; }
+    item.drop = { c: d.c, l: d.l, zone: d.zone }; logEvent("log_moved", { id: item.id, drop: code }); save();
+    setMsg($("moveMsg"), tr("m_moved", { id: item.id, drop: dropName(d) }), "ok");
+    refresh(); renderMap(d.c);
+  });
+  $("reportBtn").addEventListener("click", () => {
+    const desc = $("rDesc").value.trim();
+    if (!desc) { setMsg($("reportMsg"), tr("m_reqdesc"), "bad"); return; }
+    const r = { id: "R-" + (reports.length + 1), type: $("rType").value, desc, drop: $("rDrop").value, t: now() };
+    reports.unshift(r); logEvent("log_rep", { id: r.id, type: r.type }); save();
+    $("rDesc").value = "";
+    setMsg($("reportMsg"), tr("m_reportsaved", { id: r.id }), "ok");
+    refresh();
+  });
+
+  // Claim
+  $("claimBtn").addEventListener("click", () => {
+    const id = $("cId").value.trim(), secret = $("cSecret").value.trim();
+    const item = items.find(i => i.id === id);
+    if (!item || item.secret !== secret) { setMsg($("claimMsg"), tr("m_verify_fail"), "bad"); return; }
+    if (item.status === "Claimed") { setMsg($("claimMsg"), tr("m_claimed"), "bad"); return; }
+    item.status = "Claimed"; logEvent("log_claim", { id: item.id }); save();
+    setMsg($("claimMsg"), tr("m_verified", { id: item.id, drop: dropName(item.drop) }), "ok");
+    toast(tr("toast_verified"));
+    refresh();
+  });
+
+  // Register
+  $("search").addEventListener("input", renderRows);
+  $("demoBtn").addEventListener("click", () => {
+    const demo = [
+      { name:"Demo A", phone:"9876543210", type:"Smartphone", secret:"blue case" },
+      { name:"Demo B", phone:"9123456780", type:"Power bank", secret:"sticker on side" },
+      { name:"Demo C", phone:"9988776655", type:"Earbuds",    secret:"left one scratched" }
+    ];
+    demo.forEach(d => items.push({ id:"G-" + seq++, ...d, drop: DROPS[dropIdx++ % DROPS.length], status:"Registered" }));
+    items[items.length - 2].status = "Found";
+    logEvent("log_demo", {}); save(); toast(tr("toast_demo")); refresh();
+  });
+  $("clearBtn").addEventListener("click", () => {
+    if (!confirm(tr("confirm_clear"))) return;
+    items = []; seq = 1001; dropIdx = 0; logs = []; reports = []; save(); toast(tr("toast_cleared")); refresh();
+  });
+  $("csvBtn").addEventListener("click", () => {
+    const q = v => `"${String(v).replace(/"/g, '""')}"`;
+    const rows = [["ID", "Type", "Phone (masked)", "Drop Point", "Status"]]
+      .concat(items.map(i => [i.id, i.type, maskPhone(i.phone), i.drop.c + " " + i.drop.l, i.status]));
+    $("csvOut").value = rows.map(r => r.map(q).join(",")).join("\n");
+    setMsg($("csvMsg"), tr("m_csv"), "ok");
+  });
+
+  load(); applyStatic(); refresh();
+})();
+</script>
+</body>
+</html>
